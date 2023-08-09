@@ -1,5 +1,5 @@
 # FROMでベースイメージを設定
-# 今回はRubyのバージョン2.7をベースイメージとして設定
+# 今回はRubyのバージョン3.2.2ベースイメージとして設定
 FROM ruby:3.2.2
 # nodeやyarn等の必要なライブラリをインストール
 RUN apt-get update -qq && apt-get install -y nodejs postgresql-client
