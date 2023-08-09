@@ -1,0 +1,39 @@
+# docker-composeで使用するバージョンの設定
+# CIツールは2系以上から使える
+version: "3"
+# アプリケーションを動かすための各要素をserviceとしている
+# dbとwebというサービスが今回は登録されている
+services:
+  # データベースの設定
+  db:
+    # psqlのデータベースを設定
+    image: postgres
+    # volumeseでマウントを設定ファイルのパスを指定
+    volumes:
+      - postgresql-data:/var/lib/postgresql/data
+    # Dockerコンテナ内での環境変数を定義
+    # Rails側のdatabase.ymlに下記の情報を入れることで連携ができる(後述)
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+    # DBのDockerイメージを立ち上げる際のポート番号
+    ports:
+      - "5432:5432"
+  # webサービス(今回でいうRailsアプリ)についての設定
+  web:
+    # 同じディレクトリにあるdockerFileを参照
+    build: .
+    # Railsのサーバーを起動している
+    # 立ち上げる毎にserver.pidのファイルを削除(エラー回避用)
+    command: bash -c "rm -f tmp/pids/server.pid && bundle exec rails s -p 3000 -b '0.0.0.0'"
+    volumes:
+      - .:/app
+    ports:
+      - "3000:3000"
+    # webはdbに依存していることを明示
+    # 接続先をdbと記載するだけで使える
+    depends_on:
+      - db
+volumes:
+  postgresql-data:
+    driver: local
